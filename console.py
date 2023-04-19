@@ -16,10 +16,8 @@ import os
 
 def tokenize(args: str) -> list:
     """Tokenizer
-
     Args:
         args (str): Description
-
     Returns:
         list: Description
     """
@@ -65,7 +63,6 @@ class HBNBCommand(cmd.Cmd):
 
     def precmd(self, line):
         """Reformat command line for advanced command syntax.
-
         Usage: <class name>.<command>([<id> [<*args> or <**kwargs>]])
         (Brackets denote optional fields in usage example.)
         """
@@ -374,7 +371,6 @@ class HBNBCommand(cmd.Cmd):
 
     def do_clear(self, args):
         """Clears the screen
-
         Args:
             args(str): console args
         """
