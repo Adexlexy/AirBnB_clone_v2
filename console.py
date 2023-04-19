@@ -10,6 +10,34 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import re
+import os
+
+
+def tokenize(args: str) -> list:
+    """Tokenizer
+
+    Args:
+        args (str): Description
+
+    Returns:
+        list: Description
+    """
+    pattern = r"^(?P<name>[A-Za-z0-9]+)"
+    param_pattern = r"(?P<params>\w+=(\"[^\"]+\"|\d+))"
+
+    class_validator = re.compile(pattern)
+    params_validator = re.compile(param_pattern)
+
+    token: list =list()
+
+    obj_class = class_validator.findall(args)
+    obj.param = params_validator.findall(args)
+
+    if len(obj_class) != 0:
+        token.append(obj_class[0])
+    token.append([data[0] for data in obj_param])
+    return token
 
 
 class HBNBCommand(cmd.Cmd):
@@ -73,7 +101,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -115,13 +143,37 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
+        #Tokenize the args from the console
+        tokens = tokenize(args)
+        # check if args passed
+        if args == "" or len(tokens) < 2:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        # extract the class name
+        class_name = tokens[0]
+        # extract all params
+        params = tokens[1]
+
+        # if class not in class
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+        # create a new class instance
+        new_instance = HBNBCommand.classes[class_name]()
+        # loop through all params and setattr to the object instance
+        for param in params:
+            try:
+                 k, v = param.split("=")
+                v = v.replace("_", " ")
+                if v[0] == '"' and v[-1] == '"' and len(v) > 1:
+                    v = v[1:-1]
+                elif "." in v:
+                    v = float(v)
+                else:
+                    v = int(v)
+                setattr(new_instance, k, v)
+            except ValueError:
+                continue
         storage.save()
         print(new_instance.id)
         storage.save()
@@ -319,6 +371,18 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
+    def do_clear(self, args):
+        """Clears the screen
+
+        Args:
+            args(str): console args
+        """
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
