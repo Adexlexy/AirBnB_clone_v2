@@ -10,6 +10,20 @@ class FileStorage:
 
     def all(self):
         """Returns a dictionary of models currently in storage"""
+         # New temp to store all class
+        new_dict = {}
+        data_dict = self.__objects
+        if cls:
+            for key in data_dict.keys():
+                # remove the . from te key
+                key_dot_stripped = key.replace(".", " ")
+                # new key array
+                new_key = key_dot_stripped.split()
+                # if class name is same as name in the key
+                if (cls.__name__ == new_key[0]):
+                    new_dict[key] = self.__objects[key]
+            return new_dict
+        else:
         return FileStorage.__objects
 
     def new(self, obj):
@@ -48,3 +62,24 @@ class FileStorage:
                         self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
+
+    def delete(self, obj=None):
+        """delete an objects
+
+        Args:
+            obj (None, optional): class object
+        """
+        if obj:
+            # get key
+            key = f"{type(obj).__name__}.{obj.id}"
+            del self.__objects[key]
+
+    @classmethod
+    def set_path(cls, file_path: str):
+        """To change the save file path."""
+        cls.__file_path = file_path
+
+    @classmethod
+    def new_object(cls):
+        """Object storage."""
+        cls.__objects = {}
